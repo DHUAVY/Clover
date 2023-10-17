@@ -1,6 +1,6 @@
 # dataset settings
 multi_view_test = False
-data_root = '/home/lyn/didemo/'
+data_root = '/data_sas/fhr/didemo/'
 dataset_type = 'MsrvttVideoDataset'
 ann_file_train = data_root + 'txt_db/didemo_retrieval/train_new.pkl'
 ann_file_test = data_root + 'txt_db/didemo_retrieval/test_new.pkl'

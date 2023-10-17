@@ -1,7 +1,7 @@
 # dataset settings
 num_frames = 8
 multi_view_test = False
-data_root = '/home/lyn/tgif-qa/'
+data_root = '/data_sas/fhr/tgif-qa/'
 dataset_type = 'TGIFVideoQADataset'
 task_name = 'action'
 ann_file_train = data_root + 'annotations/{}_train.pkl'.format(task_name)

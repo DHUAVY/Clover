@@ -1,9 +1,9 @@
 # dataset settings
 multi_view_test = False
-data_root = '/home/lyn/datassd/Video/MSRVTT/data/MSRVTT/videos/'
+data_root = '/data_sas/fhr/datassd/Video/MSRVTT/data/MSRVTT/videos/'
 dataset_type = 'MsrvttVideoDataset'
-ann_file_train = '/home/lyn/MSRVTT_anno/train_Retri_9k_anno_new.pkl'
-ann_file_test = '/home/lyn/MSRVTT_anno/test_Retri_1k_anno_new.pkl'
+ann_file_train = '/data_sas/fhr/MSRVTT_anno/train_Retri_9k_anno_new.pkl'
+ann_file_test = '/data_sas/fhr/MSRVTT_anno/test_Retri_1k_anno_new.pkl'
 train_key_prefixes = None
 train_data_paths = data_root + 'all/'
 test_key_prefixes = None

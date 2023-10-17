@@ -416,7 +416,7 @@ def acc_for_msrvtt_mc(video_embd=None, text_embd=None, label=None, use_sim=False
 
     #  (2990,2990,5) -> (5,2990) -> (2990,5)
     ans_diag = torch.diagonal(scores, dim1=0, dim2=1).T
-    with open("/home/lyn/nips/re/baseline_msrvtt_mc_scores.npy", 'wb') as f:
+    with open("/data_sas/fhr/nips/re/baseline_msrvtt_mc_scores.npy", 'wb') as f:
         np.save(f, ans_diag.cpu().numpy())
     with open("gt.npy", 'wb') as f:
         np.save(f, label)
