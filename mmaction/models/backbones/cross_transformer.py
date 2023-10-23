@@ -11,9 +11,20 @@ from timm.models.layers import trunc_normal_
 @BACKBONES.register_module()
 class CrossModalTransformerFromPretrained(nn.Module):
 
-    def __init__(self, pretrained_model='bert-base-uncased', img_in_size=768, hidden_size=768, num_frames=4, spacial_tokens=7*7, 
-                        token_types=2, num_hidden_layers=12, layer_norm_eps=1e-12, word_pos_start=False, use_prompt=False,
-                        use_text_cls=False, return_mask=False, **kwargs):
+    def __init__(
+        self, 
+        pretrained_model="bert-base-uncased", 
+        img_in_size=768, 
+        hidden_size=768, 
+        num_frames=4, 
+        spacial_tokens=7*7, 
+        token_types=2, num_hidden_layers=12, 
+        layer_norm_eps=1e-12, 
+        word_pos_start=False, 
+        use_prompt=False,
+        use_text_cls=False, 
+        return_mask=False, 
+        **kwargs):
         '''
             pretrained_model: the pretrained model(bert-base)
             hidden_size: hidden_dimension

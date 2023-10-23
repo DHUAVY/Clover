@@ -5,8 +5,9 @@ _base_ = [
 ]
 # model settings
 weight_decay = 0.01
-videos_per_gpu = 16
-num_gpus = 8
+videos_per_gpu = 8
+workers_per_gpu = 4
+num_gpus = 6
 machines = 1
 num_frames = 8
 base_lr = 1.2e-5 / (videos_per_gpu * num_gpus * machines)
@@ -14,7 +15,7 @@ multi_class = False
 aux_info = ['token_ids', 'segment_ids', 'input_mask']
 save_root = '/data_sas/fhr/'
 load_pretrained_ckpts = None
-pretrained_textbackbone='bert-base-uncased'
+pretrained_textbackbone="/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
 resume_from = None
 SyncBN = False
 find_unused_parameters = True   
@@ -73,15 +74,15 @@ model = dict(
 data = dict(
     train_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
-        workers_per_gpu=4,
+        workers_per_gpu=workers_per_gpu,
         ),
     val_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
-        workers_per_gpu=4,
+        workers_per_gpu=workers_per_gpu,
         ),
     test_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
-        workers_per_gpu=4,
+        workers_per_gpu=workers_per_gpu,
         ),
     )
 evaluation = dict(interval=1, metrics=['recall_for_video_text_retrieval'], gpu_collect=True, test_fn='recall_for_video_text_retrieval')
@@ -91,9 +92,12 @@ optimizer = dict(
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
-        custom_keys={'absolute_pos_embed': dict(decay_mult=0.),
-                     'relative_position_bias_table': dict(decay_mult=0.),
-                     }))
+        custom_keys={
+            'absolute_pos_embed': dict(decay_mult=0.),
+            'relative_position_bias_table': dict(decay_mult=0.),
+        }
+    )
+)
 optimizer_config = dict(grad_clip=dict(max_norm=5))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=True,

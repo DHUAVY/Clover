@@ -1,13 +1,13 @@
 # dataset settings
 multi_view_test = False
-data_root = '/data_sas/fhr/datassd/Video/MSRVTT/data/MSRVTT/videos/'
+data_root = '/data_sas/fhr/Clover/data/video_retrieval/msrvtt/'
 dataset_type = 'MsrvttVideoDataset'
-ann_file_train = '/data_sas/fhr/MSRVTT_anno/train_Retri_9k_anno_new.pkl'
-ann_file_test = '/data_sas/fhr/MSRVTT_anno/test_Retri_1k_anno_new.pkl'
+ann_file_train = '/data_sas/fhr/Clover/data/video_retrieval/msrvtt/train_9k.pkl'
+ann_file_test = '/data_sas/fhr/Clover/data/video_retrieval/msrvtt/test.pkl'
 train_key_prefixes = None
-train_data_paths = data_root + 'all/'
+train_data_paths = data_root + 'videos/'
 test_key_prefixes = None
-test_data_paths = data_root + 'all/'
+test_data_paths = data_root + 'videos/'
 pretrained_texttokenizer='bert-base-uncased'
 img_norm_cfg = dict(
     mean=[103.53, 116.28, 123.675], std=[57.375, 57.12, 58.395], to_rgb=False)   

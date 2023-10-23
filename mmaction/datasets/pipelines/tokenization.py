@@ -18,6 +18,7 @@ class BertTokenizer_FromPretrained(object):
     """  #  add by lyn
     def __init__(self, from_pretrained, vocab_file=None, do_lower_case=True, remove_space=True, keep_accents=False, Fast=True):
         if from_pretrained is not None:
+            from_pretrained = "/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
             try:
                 self.tokenizer = HFBertTokenizer.from_pretrained(from_pretrained) if not Fast else BertTokenizerFast.from_pretrained(from_pretrained)
             except:

@@ -10,6 +10,7 @@ class BertFromPretrained(nn.Module):
     def __init__(self, pretrained_model='bert-base-uncased', layer_norm_eps=1e-12, num_hidden_layers=12, **kwargs):
         super().__init__()
         # 文本
+        pretrained_model = "/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
         bert_config = BertConfig.from_pretrained(pretrained_model, layer_norm_eps=layer_norm_eps)
         bert_config.num_hidden_layers = num_hidden_layers
         self.bert = BertModel.from_pretrained(pretrained_model, config=bert_config)

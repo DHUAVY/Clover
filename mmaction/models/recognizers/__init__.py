@@ -4,5 +4,4 @@ from .multimodal_transformer_finetune import CloverFinetune
 
 
 
-__all__ = ['BaseRecognizer', 'CloverPretrain', 'CloverFinetune'
-           ]
+__all__ = ['BaseRecognizer', 'CloverPretrain', 'CloverFinetune']
