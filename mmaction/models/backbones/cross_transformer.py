@@ -18,7 +18,8 @@ class CrossModalTransformerFromPretrained(nn.Module):
         hidden_size=768, 
         num_frames=4, 
         spacial_tokens=7*7, 
-        token_types=2, num_hidden_layers=12, 
+        token_types=2, 
+        num_hidden_layers=12, 
         layer_norm_eps=1e-12, 
         word_pos_start=False, 
         use_prompt=False,
@@ -39,6 +40,7 @@ class CrossModalTransformerFromPretrained(nn.Module):
         self.bert_extended_mask = bert.get_extended_attention_mask
         self.bert_encoder = bert.bert.encoder
         self.use_prompt = use_prompt
+        
         if not use_text_cls:
             self.all_cls_token = nn.Parameter(torch.zeros(1, 1, hidden_size))
             trunc_normal_(self.all_cls_token, mean=0., std=.02)
@@ -48,6 +50,7 @@ class CrossModalTransformerFromPretrained(nn.Module):
 
         else:
             self.all_cls_token = None
+        
         self.vis_space_pos = nn.Parameter(0.02 * torch.randn(1, 1, spacial_tokens, hidden_size))
         self.vis_tempor_pos = nn.Parameter(0.02 * torch.randn(1, num_frames, 1, hidden_size))
         self.token_type_embeddings = nn.Embedding(token_types, hidden_size)
@@ -73,7 +76,13 @@ class CrossModalTransformerFromPretrained(nn.Module):
                     self.projector.bias.data.zero_()
     
     @auto_fp16(apply_to=('visual_token',))
-    def forward(self, visual_token=None, text_input_ids=None, text_input_mask=None, text_input_embeds=None, **kwargs):
+    def forward(
+        self, 
+        visual_token=None, 
+        text_input_ids=None, 
+        text_input_mask=None, 
+        text_input_embeds=None, 
+        **kwargs):
         """multimodal transformer forward function
             [cls] visual token (+ pos + temper) [cls] word tokens [sep]
         """
@@ -83,10 +92,12 @@ class CrossModalTransformerFromPretrained(nn.Module):
         # past_key_values_length is where the word start
         # here we set to zero, use for word abs position embedding
         p_k_v_l = T * S + 1 if self.word_pos_start else 0
+        
         if text_input_embeds is None:
             text_embeddings = self.bert_embedding(input_ids=text_input_ids, past_key_values_length=p_k_v_l)  
         else:
             text_embeddings = text_input_embeds
+        
         if text_embeddings.shape[0] != B:
             # milnce  (b*n, seq, dim) -> (b, n*seq, dim)
             text_embeddings = text_embeddings.view(B, -1, text_embeddings.shape[-1])
@@ -119,6 +130,7 @@ class CrossModalTransformerFromPretrained(nn.Module):
         multimodal_feat, multimodal_mask = torch.cat([visual_token, text_embeddings], dim=1), torch.cat([visual_input_mask, text_input_mask], dim=1)
         mask = self.bert_extended_mask(multimodal_mask, multimodal_mask.shape, multimodal_mask.device)
         out = self.bert_encoder(multimodal_feat, mask, output_attentions=True)
+        
         if self.all_cls_token is not None and not self.use_prompt:
             v_seq_len = 1 + T * S
         elif self.use_prompt:

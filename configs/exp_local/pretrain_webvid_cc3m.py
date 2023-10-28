@@ -101,6 +101,9 @@ model = dict(
         use_rank_trtm=False,
         margin_ttm=5.,
         margin_trtm=10.,
+        lambda_CKA=0.1,
+        use_CKA=False,
+        use_gated=False
     ),
     symmetry_rank=True,
     train_cfg=dict(aux_info=aux_info))
@@ -124,20 +127,43 @@ data = dict(
 )
 
 
-evaluation = dict(interval=1, metrics=['recall_for_video_text_retrieval'], gpu_collect=True, test_fn='recall_for_video_text_retrieval', save_best='Recall@all')
+evaluation = dict(
+    interval=1, 
+    metrics=['recall_for_video_text_retrieval'], 
+    gpu_collect=True, 
+    test_fn='recall_for_video_text_retrieval', 
+    save_best='Recall@all')
+
 # optimizer
 optimizer = dict(
     type='AdamW', base_lr=base_lr, betas=(0.9, 0.98), eps=1e-8, weight_decay=weight_decay,
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
-        custom_keys={'absolute_pos_embed': dict(decay_mult=0.),
-                     'relative_position_bias_table': dict(decay_mult=0.),
-                     }))
+        custom_keys={
+            'absolute_pos_embed': dict(decay_mult=0.),
+            'relative_position_bias_table': dict(decay_mult=0.),
+        }
+    )
+)
+
 optimizer_config = dict(grad_clip=dict(max_norm=15))
 # learning policy
-lr_config = dict(policy='CosineAnnealing', min_lr_ratio=1e-3, by_epoch=False,
-                 warmup='linear', warmup_iters=4, warmup_ratio=0.001, warmup_by_epoch=True)
+
+lr_config = dict(
+    policy='CosineAnnealing', 
+    min_lr_ratio=1e-3, 
+    by_epoch=False,
+    warmup='linear',
+    warmup_iters=4, 
+    warmup_ratio=0.001, 
+    warmup_by_epoch=True
+)
+
 total_epochs = 40
-checkpoint_config = dict(type='MYCheckpointHook', interval=1, ## del_local_ckpt=True,
-                         save_root=save_root+'/Clover/work_dirs/')
+
+checkpoint_config = dict(
+    type='MYCheckpointHook', 
+    interval=1, ## del_local_ckpt=True,
+    save_root=save_root+'/Clover/work_dirs/'
+)

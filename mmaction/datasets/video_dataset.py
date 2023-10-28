@@ -142,7 +142,14 @@ class MsrvttVideoDataset(PKLVideoDataset):
 
         return video_infos
            
-    def evaluate(self, results, metrics='recall_for_video_text_retrieval', metric_options=None, logger=None, normalize=False, **deprecated_kwargs):
+    def evaluate(
+        self, 
+        results, 
+        metrics='recall_for_video_text_retrieval', 
+        metric_options=None, 
+        logger=None, 
+        normalize=False, 
+        **deprecated_kwargs):
         '''Evaluate the dataset with
             Retrieval / video QA / classification / video caption ?
             TODO: 后面三个

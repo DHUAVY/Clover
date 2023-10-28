@@ -3,9 +3,18 @@ from .cross_entropy_loss import BCELossWithLogits, CrossEntropyLoss, BCELoss, BC
 from .focal_loss import SoftmaxFocalLossMultiClass
 
 from .contrastive_loss import NormSoftmaxLoss, ExclusiveNCEwithRankingLoss
+from .contrastive_CKA_loss import NormSoftmaxLossWithCKA
 
 __all__ = [
     'BaseWeightedLoss',
-    'NormSoftmaxLoss', 'ExclusiveNCEwithRankingLoss', 'SoftmaxFocalLossMultiClass',
-    'BCELossWithLogits', 'CrossEntropyLoss', 'BCELoss', 'BCELossWithLogitsAndIgnore', 'LabelSmoothingCrossEntropy', 'SoftTargetCrossEntropy',
+    'NormSoftmaxLoss', 
+    'NormSoftmaxLossWithCKA',
+    'ExclusiveNCEwithRankingLoss', 
+    'SoftmaxFocalLossMultiClass',
+    'BCELossWithLogits', 
+    'CrossEntropyLoss', 
+    'BCELoss', 
+    'BCELossWithLogitsAndIgnore', 
+    'LabelSmoothingCrossEntropy', 
+    'SoftTargetCrossEntropy',
 ]

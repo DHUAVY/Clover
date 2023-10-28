@@ -10,23 +10,24 @@ from einops import rearrange
 
 @RECOGNIZERS.register_module()
 class CloverPretrain(BaseRecognizer):
-    def __init__(self,
-                 mm_backbone,
-                 text_backbone=None,
-                 freeze_text_backbone=None,
-                 freeze_dvae_backbone=None,
-                 loss_type=None,
-                 ssl_loss=None, 
-                 ssl_head=None,
-                 mlm_head=None,
-                 mlm_loss=None,
-                 mlm_ssl_head=None,
-                 symmetry_rank=False,
-                 separate_test=False,
-                 from_scratch=False,
-                 use_Cmask=True,
-                 text_vocab_size=30522,
-                 **kwargs):
+    def __init__(
+        self,
+        mm_backbone,
+        text_backbone=None,
+        freeze_text_backbone=None,
+        freeze_dvae_backbone=None,
+        loss_type=None,
+        ssl_loss=None, 
+        ssl_head=None,
+        mlm_head=None,
+        mlm_loss=None,
+        mlm_ssl_head=None,
+        symmetry_rank=False,
+        separate_test=False,
+        from_scratch=False,
+        use_Cmask=True,
+        text_vocab_size=30522,
+        **kwargs):
         super().__init__(**kwargs)
 
         self.multimodal_backbone = build_backbone(mm_backbone)
@@ -74,8 +75,19 @@ class CloverPretrain(BaseRecognizer):
         return visual_emb
     
     @auto_fp16(apply_to=('imgs', 'dvae_imgs'))
-    def forward_train(self, imgs, label, token_ids=None, segment_ids=None, input_mask=None, 
-                      mlm_label=None, dvae_imgs=None, v_token_mask=None, hog_features=None, img_metas=None, **kwargs):
+    def forward_train(
+        self, 
+        imgs, 
+        label, 
+        token_ids=None, 
+        segment_ids=None, 
+        input_mask=None, 
+        mlm_label=None, 
+        dvae_imgs=None, 
+        v_token_mask=None, 
+        hog_features=None, 
+        img_metas=None, 
+        **kwargs):
         """Defines the computation performed at every call when training."""            
         # (batch_size, num_clips*num_crops, channel, num_segments, h, w) -> (batch_size*num_clips*num_crops, channel, num_segments, h, w)
         imgs = imgs.reshape((-1, ) + imgs.shape[2:]) 
@@ -119,9 +131,6 @@ class CloverPretrain(BaseRecognizer):
         t_fusion_output = self.multimodal_backbone(visual_token=visual_token, text_input_mask=text_input_mask, text_input_embeds=text_out_last_hidden_state)
         # for mlm #
         t_last_hidden_state = t_fusion_output['t_last_hidden_state']
-
-
-
 
 
         # ------------ MLM loss ------------ #

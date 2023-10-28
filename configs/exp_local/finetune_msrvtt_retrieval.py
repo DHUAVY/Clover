@@ -20,7 +20,7 @@ resume_from = None
 SyncBN = False
 find_unused_parameters = True   
 fp16 = dict(loss_scale='dynamic')
-finetune_task =  "retrieval"
+finetune_task = "retrieval"
 model = dict(
     type='CloverFinetune',
     freeze_stage=None,
@@ -85,7 +85,12 @@ data = dict(
         workers_per_gpu=workers_per_gpu,
         ),
     )
-evaluation = dict(interval=1, metrics=['recall_for_video_text_retrieval'], gpu_collect=True, test_fn='recall_for_video_text_retrieval')
+evaluation = dict(
+    interval=1, 
+    metrics=['recall_for_video_text_retrieval'], 
+    gpu_collect=True, 
+    test_fn='recall_for_video_text_retrieval'
+)
 # optimizer
 optimizer = dict(
     type='AdamW', base_lr=base_lr, betas=(0.9, 0.98), eps=1e-8, weight_decay=weight_decay,
@@ -103,5 +108,8 @@ optimizer_config = dict(grad_clip=dict(max_norm=5))
 lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=True,
                  warmup='linear', warmup_iters=10, warmup_ratio=0.001, warmup_by_epoch=True)
 total_epochs = 100
-checkpoint_config = dict(type='MYCheckpointHook', interval=-1, # del_local_ckpt=True,
-                         save_root=save_root+'Clover/work_dirs/')
+checkpoint_config = dict(
+    type='MYCheckpointHook', 
+    interval=-1, # del_local_ckpt=True,
+    save_root=save_root+'Clover/work_dirs/'
+)

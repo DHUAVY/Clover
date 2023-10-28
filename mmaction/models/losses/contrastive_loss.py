@@ -5,7 +5,7 @@ from ..builder import LOSSES
 from mmcv.runner import get_dist_info
 from mmaction.core.hooks.fp16_utils import force_fp32
 from mmaction.models.utils.gather_loss import GatherLoss, VariedShapeGatherLoss
-
+from .loss_utils import *
 
 def sim_matrix(a, b, eps=1e-8):
     """
@@ -64,13 +64,25 @@ class NormSoftmaxLoss(nn.Module):
 
         jdiag = torch.diag(j_logsm)
         loss_j = jdiag.sum() / len(jdiag)
-
+        print("loss_type:", type(loss_j))
+        
         return - loss_i - loss_j
 
-
+    
 @LOSSES.register_module()
 class ExclusiveNCEwithRankingLoss(nn.Module):
-    def __init__(self, temperature=0.05, use_rank=False, use_rank_ttm=True, use_rank_trtm=True, margin_ttm=5., margin_trtm=10.,):
+    def __init__(
+        self, 
+        temperature=0.05, 
+        use_rank=False, 
+        use_rank_ttm=True, 
+        use_rank_trtm=True, 
+        margin_ttm=5., 
+        margin_trtm=10.,
+        lambda_CKA=0.1,
+        use_CKA=False,
+        use_gated=False
+    ):
         super().__init__()
         self.t = temperature
         self.allgather = VariedShapeGatherLoss.apply
@@ -80,10 +92,19 @@ class ExclusiveNCEwithRankingLoss(nn.Module):
         self.use_rank = use_rank
         self.use_rank_ttm = use_rank_ttm
         self.use_rank_trtm = use_rank_trtm
+        
         if self.use_rank_ttm:
             self.margin_ranking_ttm = nn.MarginRankingLoss(self.margin_ttm)
         if self.use_rank_trtm:
             self.margin_ranking_trtm = nn.MarginRankingLoss(self.margin_trtm)
+        
+        # CKA loss
+        self.use_CKA = use_CKA
+        self.lambda_CKA = lambda_CKA
+        
+        # gated
+        self.use_gated = use_gated
+        
         self.fp16_enabled = False
 
     def compute_loss(self, sim_mat, reverse=True):
@@ -140,7 +161,6 @@ class ExclusiveNCEwithRankingLoss(nn.Module):
         vtall_diag = torch.diag(vt_logsm) + torch.diag(vtm_logsm) + torch.diag(vtr_logsm)
         loss_v = - (vtall_diag.sum() / len(vtall_diag))
         
-
         # t2v
         t2v = torch.cat([sim_vt, sim_vtm, sim_vtr], dim=1).t()
         t2v_logsm = F.log_softmax(t2v, dim=1)  # 3B, B 
@@ -148,7 +168,13 @@ class ExclusiveNCEwithRankingLoss(nn.Module):
         t2v_diag = t2v_logsm.diagonal(dim1=1, dim2=2)  # 3, B
         t2v_value = t2v_diag.mean(dim=1)               # 3
         loss_t = -torch.mean(t2v_value)
-        losses['nce_loss'] = loss_v + loss_t
+        
+        
+        if not self.use_CKA:
+            losses['nce_loss'] = loss_v + loss_t
+        else:  # add CKA loss
+            CKAloss = torch.tensor(CKA(video_embd, text_embd))
+            losses['nce_loss'] = loss_v + loss_t + self.lambda_CKA * CKAloss
 
 
         #### rank loss #####
