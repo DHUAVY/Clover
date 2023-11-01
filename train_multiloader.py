@@ -98,14 +98,15 @@ def _init_dist(launcher='pytorch', backend='nccl', **kwargs):
         raise ValueError(f'Invalid launcher type: {launcher}')
 
 
-def train_model(model,
-                dataset,
-                cfg,
-                distributed=False,
-                validate=False,
-                test=dict(test_best=False, test_last=False),
-                timestamp=None,
-                meta=None):
+def train_model(
+    model,
+    dataset,
+    cfg,
+    distributed=False,
+    validate=False,
+    test=dict(test_best=False, test_last=False),
+    timestamp=None,
+    meta=None):
     """Train model entry function.
 
     Args:
@@ -135,9 +136,9 @@ def train_model(model,
         dist=distributed,
         seed=cfg.seed)
     
-    dataloader_settings = []
-    dataloader_settings.append(dict(dataloader_setting, **cfg.data.train_dataloader))
-    # dataloader_settings = [dict(dataloader_setting, **v) for k, v in cfg.data.train_dataloader.items()]
+    # dataloader_settings = []
+    # dataloader_settings.append(dict(dataloader_setting, **cfg.data.train_dataloader))
+    dataloader_settings = [dict(dataloader_setting, **v) for k, v in cfg.data.train_dataloader.items()]
 
     data_loaders = [
         build_dataloader(ds, **dl_setting) for ds, dl_setting in zip(dataset, dataloader_settings)
@@ -185,9 +186,11 @@ def train_model(model,
         optimizer_config = cfg.optimizer_config
 
     # register hooks
-    runner.register_training_hooks(cfg.lr_config, optimizer_config,
-                                   cfg.checkpoint_config, cfg.log_config,
-                                   cfg.get('momentum_config', None))
+    runner.register_training_hooks(
+        cfg.lr_config, optimizer_config,
+        cfg.checkpoint_config, 
+        cfg.log_config,
+        cfg.get('momentum_config', None))
 
     if validate:
         eval_cfg = cfg.get('evaluation', {})
@@ -347,9 +350,9 @@ def main():
     # build train datasets
     datasets = []
     train_cfg_dict = copy.deepcopy(cfg.data.train)
-    datasets.append(build_dataset(train_cfg_dict, dict()))
-    # for train_cfg in list(train_cfg_dict.values()):
-    #     datasets.append(build_dataset(train_cfg, dict()))
+    # datasets.append(build_dataset(train_cfg_dict, dict()))
+    for train_cfg in list(train_cfg_dict.values()):
+        datasets.append(build_dataset(train_cfg, dict()))
 
     if cfg.checkpoint_config is not None:
         # save mmaction version, config file content and class names in

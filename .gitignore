@@ -137,3 +137,5 @@ mmaction/.mim/*
 readme_trar.md
 
 work_dirs
+data/
+pretrainedModel/

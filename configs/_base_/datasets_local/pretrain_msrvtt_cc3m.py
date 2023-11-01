@@ -1,14 +1,14 @@
 # dataset settings
-videos_per_gpu = 16
+videos_per_gpu = 8
 num_frames = 8
 multi_class = False
 multi_view_test = False
 
-webvid_dataset_type = 'WebVidDataset'
-webvid_data_root = '/data_sas/fhr/webvid/'
-ann_file_train_webvid = webvid_data_root + 'webvid_val.pkl'
-train_webvid_key_prefixes = None
-train_webvid_data_paths = webvid_data_root + 'videos/val_video/'
+msrvtt_dataset_type = 'MsrvttVideoDataset'
+msrvtt_data_root = '/data_sas/fhr/Clover/data/video_retrieval/msrvtt/'
+ann_file_train_msrvtt = msrvtt_data_root + 'train_9k.pkl'
+train_msrvtt_key_prefixes = None
+train_msrvtt_data_paths = msrvtt_data_root + 'videos/'
 
 cc3m_dataset_type = 'CC3MDataset'
 cc3m_data_root = '/data_sas/fhr/Clover/data/pretrain/cc3m/'
@@ -24,7 +24,7 @@ val_data_paths = msrvtt_data_root + 'videos/'
 
 img_norm_cfg = dict(mean=[103.53, 116.28, 123.675], std=[57.375, 57.12, 58.395], to_rgb=False)  
 pretrained_texttokenizer='bert-base-uncased'
-train_webvid_pipeline = [
+train_msrvtt_pipeline = [
     dict(type='DecordInit'),
     dict(type='SampleFrames', clip_len=1, frame_interval=1, num_clips=num_frames),
     dict(type='DecordDecode'),
@@ -105,11 +105,11 @@ evaluation = dict(interval=1, metrics=['recall_for_video_text_retrieval'], gpu_c
 data = dict(
     train=dict(
         train_set1=dict(
-            type=webvid_dataset_type,
-            ann_file=ann_file_train_webvid,
-            pipeline=train_webvid_pipeline,
+            type=msrvtt_dataset_type,
+            ann_file=ann_file_train_msrvtt,
+            pipeline=train_msrvtt_pipeline,
             start_index=0,
-            data_prefix=train_webvid_data_paths,
+            data_prefix=train_msrvtt_data_paths,
         ),
         train_set2=dict(
             type=cc3m_dataset_type,

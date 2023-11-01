@@ -155,15 +155,16 @@ class NCEHeadForVision(nn.Module):
             the head.
     """
 
-    def __init__(self,
-                 cross_in_channels=768,
-                 visual_in_channels=1024,
-                 hidden_dim=768,
-                 vts_embed_dim=768,
-                 dropout_ratio=0.1,
-                 ln=False,
-                 init_std=0.01,
-                 **kwargs):
+    def __init__(
+        self,
+        cross_in_channels=768,
+        visual_in_channels=768,
+        hidden_dim=768,
+        vts_embed_dim=768,
+        dropout_ratio=0.1,
+        ln=False,
+        init_std=0.01,
+        **kwargs):
         super().__init__()
         self.cross_in_channels = cross_in_channels
         self.visual_in_channels = visual_in_channels
@@ -206,11 +207,13 @@ class NCEHeadForVision(nn.Module):
         Returns:
             torch.Tensor: The classification scores for input samples.
         """
-        # [b, 4*7*7, in_channels]
-        img = img.mean(dim=1)
+        # [b, 4*7*7, in_channels] or [b, in_channels]
+        if len(img.shape) == 3:
+            img = img.mean(dim=1)
         if self.dropout is not None:
             img = self.dropout(img)
         # [b, in_channels]
+        # print("-----img.shape:", img.shape, "-----")
         img = self.img_fc1(img)
         img = self.img_bn1(img)
         img = self.img_act(img)
@@ -237,12 +240,13 @@ class NCEHeadForText(nn.Module):
             the head.
     """
 
-    def __init__(self,
-                 cross_in_channels=768,
-                 vts_embed_dim=768,
-                 dropout_ratio=0.1,
-                 text_bn=False,
-                 **kwargs):
+    def __init__(
+        self,
+        cross_in_channels=768,
+        vts_embed_dim=768,
+        dropout_ratio=0.1,
+        text_bn=False,
+        **kwargs):
         super().__init__()
         self.cross_in_channels = cross_in_channels
         self.vts_embed_dim = vts_embed_dim

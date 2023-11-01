@@ -1,12 +1,13 @@
 _base_ = [
-    '../_base_/datasets_local/msrvtt_QA_oe.py',
+    '../_base_/datasets_local/msrvtt_retrieval.py',
     '../_base_/models/swin3d/swin3d_base.py',
     '../_base_/default_runtime.py'
 ]
 # model settings
-weight_decay = 0.001
-videos_per_gpu = 32
-num_gpus = 8
+weight_decay = 0.01
+videos_per_gpu = 8
+workers_per_gpu = 4
+num_gpus = 6
 machines = 1
 num_frames = 8
 base_lr = 1.2e-5 / (videos_per_gpu * num_gpus * machines)
@@ -14,26 +15,27 @@ multi_class = False
 aux_info = ['token_ids', 'segment_ids', 'input_mask']
 save_root = '/data_sas/fhr/'
 load_pretrained_ckpts = None
-pretrained_textbackbone='bert-base-uncased'
+pretrained_textbackbone="/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
 resume_from = None
-SyncBN = True
-find_unused_parameters = False   
+SyncBN = False
+find_unused_parameters = True   
 fp16 = dict(loss_scale='dynamic')
-finetune_task = "video_qa"
+finetune_task = "retrieval"
 model = dict(
     type='CloverFinetune',
     freeze_stage=None,
-    separate_test=False,
+    separate_test=True,
     # freeze_stage=('backbone.patch_embed.',),   # freeze_stage=('text_backbone.', 'backbone.'),
     # freeze_except=('backbone.layers.3.',),
     backbone=dict(
         type='SwinTransformer3D',
+        stride=(2, 4, 4),
         pretrained2d=False,
         pretrained=load_pretrained_ckpts),
-    freeze_text_backbone=False,
+    freeze_text_backbone=None,
     text_vocab_size=30522,
     mm_backbone=dict(
-        type='CrossModalTransformerFromPretrained', 
+        type='CrossModalTransformerFromPretrained', # 后面那堆参数没用，fromPretrain表示用的现成的模型，模型大小是固定的
         use_text_cls=True,
         pretrained_model=pretrained_textbackbone,
         num_hidden_layers=3,
@@ -50,36 +52,41 @@ model = dict(
         num_hidden_layers=12,
     ),
     cls_head=None,    
-    task=finetune_task,
-    ssl_head=None,
+    task='retrieval',
+    ssl_head=dict(
+        type='NCEHeadForMM',
+        visual_in_channels=1024,
+        text_in_channels=768,
+        img_hidden_dim=768*2,
+        vts_embed_dim=768,
+        ln=True,
+        spatial_type='avg',
+        text_agg_type='cls',
+        dropout_ratio=0,),
     itm_head=None,
-    answer_cls=True,
-    qa_head=dict(
-        type='QA_OE_Head',
-        hidden_dim=768,
-        dropout_ratio=0.1,
-        num_labels=1500,
-    ),
     loss_type=dict(
-        type="CrossEntropyLoss",
-        ),
-    train_cfg=dict(aux_info=aux_info))
-
+        type="NormSoftmaxLossWithCKA",
+        cos_sim=True,
+        lambdaCKA=0.1,
+        temperature=0.05,
+    ),
+    train_cfg=dict(aux_info=aux_info),
+    test_cfg=dict(feature_extraction=False,))
 data = dict(
     train_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
-        workers_per_gpu=4,
+        workers_per_gpu=workers_per_gpu,
         ),
     val_dataloader=dict(
-        videos_per_gpu=4,
-        workers_per_gpu=4,
+        videos_per_gpu=videos_per_gpu,
+        workers_per_gpu=workers_per_gpu,
         ),
     test_dataloader=dict(
-        videos_per_gpu=4,
-        workers_per_gpu=4,
+        videos_per_gpu=videos_per_gpu,
+        workers_per_gpu=workers_per_gpu,
         ),
     )
-evaluation = dict(interval=1, metrics=['video_qa_oe'], gpu_collect=True, test_fn='use_itm_head_fn')
+evaluation = dict(interval=1, metrics=['recall_for_video_text_retrieval'], gpu_collect=True, test_fn='recall_for_video_text_retrieval')
 # optimizer
 optimizer = dict(
     type='AdamW', base_lr=base_lr, betas=(0.9, 0.98), eps=1e-8, weight_decay=weight_decay,
@@ -87,12 +94,15 @@ optimizer = dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
         custom_keys={
-                     'qa_head': dict(lr_mult=10)
-                     }))
-optimizer_config = dict(grad_clip=dict(max_norm=50))
+            'absolute_pos_embed': dict(decay_mult=0.),
+            'relative_position_bias_table': dict(decay_mult=0.),
+        }
+    )
+)
+optimizer_config = dict(grad_clip=dict(max_norm=5))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=True,
-                 warmup='linear', warmup_iters=2, warmup_ratio=0.0001, warmup_by_epoch=True)
-total_epochs = 20
+                 warmup='linear', warmup_iters=10, warmup_ratio=0.001, warmup_by_epoch=True)
+total_epochs = 100
 checkpoint_config = dict(type='MYCheckpointHook', interval=-1, # del_local_ckpt=True,
-                         save_root=save_root+'/Clover/work_dirs/')
+                         save_root=save_root+'Clover/work_dirs/')
