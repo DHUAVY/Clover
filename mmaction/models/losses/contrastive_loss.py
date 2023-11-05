@@ -158,7 +158,13 @@ class ExclusiveNCEwithRankingLoss(nn.Module):
         vtm_logsm = F.log_softmax(v2t_forvtm, dim=1)[:, B:2*B]
         vtr_logsm = F.log_softmax(v2t_forvtr, dim=1)[:, 2*B:3*B]
 
-        vtall_diag = torch.diag(vt_logsm) + torch.diag(vtm_logsm) + torch.diag(vtr_logsm)
+        if self.use_gated:
+            sum_vtm = torch.diag(vtm_logsm).sum()
+            sum_vtr = torch.diag(vtr_logsm).sum()
+            vtall_diag = torch.diag(vt_logsm) + torch.diag(vtm_logsm) if abs(sum_vtm) > abs(sum_vtr) else torch.diag(vtr_logsm)
+        else:
+            vtall_diag = torch.diag(vt_logsm) + torch.diag(vtm_logsm) + torch.diag(vtr_logsm)
+            
         loss_v = - (vtall_diag.sum() / len(vtall_diag))
         
         # t2v
@@ -167,6 +173,10 @@ class ExclusiveNCEwithRankingLoss(nn.Module):
         t2v_logsm = t2v_logsm.view(-1, t2v.shape[1], t2v.shape[1])   # 3, B, B
         t2v_diag = t2v_logsm.diagonal(dim1=1, dim2=2)  # 3, B
         t2v_value = t2v_diag.mean(dim=1)               # 3
+        
+        if self.use_gated:
+            t2v_value = torch.tensor([t2v_value[0], t2v_value[1] if abs(t2v_value[1]) > abs(t2v_value[2]) else t2v_value[2]])
+        
         loss_t = -torch.mean(t2v_value)
         
         
