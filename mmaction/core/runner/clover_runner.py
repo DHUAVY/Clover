@@ -54,8 +54,8 @@ class MyEpochBasedRunner(TimerEpochBasedRunner):
 
 @RUNNERS.register_module()
 class MyEpochBasedMultiDatasetRunner(MyEpochBasedRunner):
-    """Support multiple train dataloader
-
+    """
+        Support multiple train dataloader
     """
     def train(self, data_loader, **kwargs):
         self.model.train()
@@ -69,28 +69,57 @@ class MyEpochBasedMultiDatasetRunner(MyEpochBasedRunner):
         self.data_loader = max_len_loader
         self._max_iters = self._max_epochs * len(max_len_loader)
 
-        self.data_iter = [loader_i for loader_i in data_loader]
+        # self.data_iter = [loader_i for loader_i in data_loader]
+        self.data_iter = [iter(loader_i) for loader_i in data_loader]
+        
         self.call_hook('before_train_epoch')
         time.sleep(2)  # Prevent possible deadlock during epoch transition
-        short_loader = None
+        
+        # short_loader = None
+        short_loaders = [None] * len(data_loader)
+        
         for batch_idx, data_batchs in enumerate(zip_longest(*self.data_iter)):
             self._inner_iter = batch_idx
             for loader_idx, data_batch in enumerate(data_batchs):  
-                if short_loader is None and data_batch is None:
-                    short_loader = iter(data_loader[loader_idx])
-                    data_batch = next(short_loader)
-                elif short_loader is not None:
-                    data_batch = next(short_loader)
-
-                self.call_hook('before_train_iter')         
-                self.run_iter(data_batch, train_mode=True, **kwargs)
-                self.call_hook('after_train_iter')   
+                # if short_loader is None and data_batch is None:
+                if data_batch is None:
+                    # short_loader = iter(data_loader[loader_idx])
+                    # data_batch = next(short_loader)
+                    if short_loaders[loader_idx] is None:
+                        short_loaders[loader_idx] = iter(data_loader[loader_idx])
+                # elif short_loader is not None:
+                #     data_batch = next(short_loader)
+                    try:
+                        data_batch = next(short_loaders[loader_idx])  # Attempt to get the next batch
+                    except StopIteration:
+                        # If short_loader is exhausted, break out of the inner loop
+                        # This means there's no more data to process for this loader
+                        break
+                    
+                if data_batch is not None:
+                    self.call_hook('before_train_iter')
+                    self.run_iter(data_batch, train_mode=True, **kwargs)
+                    self.call_hook('after_train_iter')
+                # self.call_hook('before_train_iter')         
+                # self.run_iter(data_batch, train_mode=True, **kwargs)
+                # self.call_hook('after_train_iter')   
                                                       
 
             self._iter += 1  # total iter num
             
-            if batch_idx >= (max([len(loader) - 1 for loader in data_loader])):
-                break
+            # if batch_idx >= (max([len(loader) - 1 for loader in data_loader])):
+            #     break
+            # Stop the epoch if all loaders are exhausted
+            if all(loader_idx is not None and short_loaders[loader_idx] is not None
+                   for loader_idx in range(len(data_loader))):
+                try:
+                    # Check if all loaders are exhausted by calling next() and catching StopIteration
+                    next_batches = [next(short_loaders[loader_idx]) for loader_idx in range(len(data_loader))
+                                    if short_loaders[loader_idx] is not None]
+                    if not next_batches:  # If no next batches could be retrieved, all loaders are done
+                        break
+                except StopIteration:
+                    break
 
         self.call_hook('after_train_epoch')
         self._epoch += 1
