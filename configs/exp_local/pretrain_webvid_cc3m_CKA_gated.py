@@ -103,7 +103,7 @@ model = dict(
         margin_trtm=10.,
         lambda_CKA=0.1,
         use_CKA=True,
-        use_gated=True
+        use_gated=False
     ),
     symmetry_rank=True,
     train_cfg=dict(aux_info=aux_info))
