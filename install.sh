@@ -4,10 +4,12 @@ pip3 uninstall mmaction2 -y
 pip3 uninstall mmcv-full -y
 
 # conda install av -c conda-forge -y
-pip3 install Cython==0.29.36    
+pip3 install Cython==0.29.36
+pip3 install timm==0.9.7    
+pip3 install setuptools==59.5.0
 pip3 install av
 pip3 install PyTurboJPEG moviepy decord==0.4.1
-pip3 install einops timm prettytable nvidia-ml-py3 Cython numpy matplotlib Pillow six terminaltables IPython mmpycocotools albumentations>=0.3.2
+pip3 install einops prettytable nvidia-ml-py3 Cython numpy matplotlib Pillow six terminaltables IPython mmpycocotools albumentations>=0.3.2
 pip3 install -U fire lmdb tqdm sklearn pandas
 pip3 install --upgrade --force-reinstall opencv-python-headless
 pip3 install -U opencv-python-headless
