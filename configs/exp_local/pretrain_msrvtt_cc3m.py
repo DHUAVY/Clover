@@ -167,6 +167,6 @@ total_epochs = 40
 
 checkpoint_config = dict(
     type='MYCheckpointHook', 
-    interval=1, ## del_local_ckpt=True,
+    interval=10, ## del_local_ckpt=True,
     save_root=save_root+'Clover/work_dirs/'
 )
