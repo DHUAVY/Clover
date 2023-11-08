@@ -107,9 +107,10 @@ optimizer_config = dict(grad_clip=dict(max_norm=5))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=True,
                  warmup='linear', warmup_iters=10, warmup_ratio=0.001, warmup_by_epoch=True)
-total_epochs = 100
+total_epochs = 40
 checkpoint_config = dict(
     type='MYCheckpointHook', 
-    interval=-1, # del_local_ckpt=True,
+    interval=10, 
     save_root=save_root+'Clover/work_dirs/'
+    # del_local_ckpt=True
 )
