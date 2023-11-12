@@ -5,8 +5,8 @@ _base_ = [
 ]
 # model settings
 weight_decay = 0.01
-videos_per_gpu = 16
-num_gpus = 8
+videos_per_gpu = 8
+num_gpus = 6
 machines = 1
 num_frames = 8
 base_lr = 1.2e-5 / (videos_per_gpu * num_gpus * machines)
@@ -62,23 +62,23 @@ model = dict(
     ),
     loss_type=dict(
         type="CrossEntropyLoss",
-        ),
+    ),
     train_cfg=dict(aux_info=aux_info))
 
 data = dict(
     train_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
         workers_per_gpu=4,
-        ),
+    ),
     val_dataloader=dict(
         videos_per_gpu=5,
         workers_per_gpu=4,
-        ),
+    ),
     test_dataloader=dict(
         videos_per_gpu=5,
         workers_per_gpu=4,
-        ),
-    )
+    ),
+)
     
 evaluation = dict(interval=1, metrics=['video_qa_oe'], gpu_collect=True, test_fn='use_itm_head_fn')
 # optimizer
@@ -87,9 +87,9 @@ optimizer = dict(
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
-        custom_keys={
-                     'qa_head': dict(lr_mult=10)
-                     }))
+        custom_keys={'qa_head': dict(lr_mult=10)}
+    )
+)
 optimizer_config = dict(grad_clip=dict(max_norm=50))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=False,

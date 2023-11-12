@@ -64,7 +64,6 @@ class NormSoftmaxLoss(nn.Module):
 
         jdiag = torch.diag(j_logsm)
         loss_j = jdiag.sum() / len(jdiag)
-        print("loss_type:", type(loss_j))
         
         return - loss_i - loss_j
 

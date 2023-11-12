@@ -62,29 +62,33 @@ model = dict(
         ln=True,
         spatial_type='avg',
         text_agg_type='cls',
-        dropout_ratio=0,),
+        dropout_ratio=0
+    ),
     itm_head=None,
     loss_type=dict(
         type="NormSoftmaxLoss",
         cos_sim=True,
         temperature=0.05,
-        ),
+    ),
     train_cfg=dict(aux_info=aux_info),
-    test_cfg=dict(feature_extraction=False,))
+    test_cfg=dict(feature_extraction=False)
+)
+
 data = dict(
     train_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
         workers_per_gpu=workers_per_gpu,
-        ),
+    ),
     val_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
         workers_per_gpu=workers_per_gpu,
-        ),
+    ),
     test_dataloader=dict(
         videos_per_gpu=videos_per_gpu,
         workers_per_gpu=workers_per_gpu,
-        ),
-    )
+    ),
+)
+
 evaluation = dict(
     interval=1, 
     metrics=['recall_for_video_text_retrieval'], 
@@ -105,8 +109,15 @@ optimizer = dict(
 )
 optimizer_config = dict(grad_clip=dict(max_norm=5))
 # learning policy
-lr_config = dict(policy='CosineAnnealing', min_lr_ratio=0, by_epoch=True,
-                 warmup='linear', warmup_iters=10, warmup_ratio=0.001, warmup_by_epoch=True)
+lr_config = dict(
+    policy='CosineAnnealing', 
+    min_lr_ratio=0, 
+    by_epoch=True,
+    warmup='linear', 
+    warmup_iters=10, 
+    warmup_ratio=0.001, 
+    warmup_by_epoch=True
+)
 total_epochs = 40
 checkpoint_config = dict(
     type='MYCheckpointHook', 

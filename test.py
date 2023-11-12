@@ -302,8 +302,7 @@ def main():
         workers_per_gpu=cfg.data.test.get('workers_per_gpu', 1),
         dist=distributed,
         shuffle=False)
-    dataloader_setting = dict(dataloader_setting,
-                              **cfg.data.get('test_dataloader', {}))
+    dataloader_setting = dict(dataloader_setting, **cfg.data.get('test_dataloader', {}))
     data_loader = build_dataloader(dataset, **dataloader_setting)
 
     if args.checkpoint.endswith('.pth'):
@@ -324,7 +323,7 @@ def main():
             for key, output in outputs.items():
                 eval_res = dataset.evaluate(output, **eval_config)
                 epoch_num = key.split('/')[-1]
-                print(epoch_num, eval_res)
+                print("epoch_num:", epoch_num, "eval_res:", eval_res)
                 for name, val in eval_res.items():
                     if isinstance(val, (list, tuple)): 
                         if isinstance(val[0], (list, tuple)):
@@ -348,10 +347,20 @@ def main():
                         dump_dict[int(epoch_num.split('_')[-1].split('.')[0])] = {name: val}
                     else:
                         print(f'{name}: {val:.04f}')
+                        
+            print(dump_dict)
             if output_config.get('out', None):
                 out = output_config['out']
+                with open(out, 'r') as f:
+                    try:
+                        data = json.load(f)
+                        if type(data) != list:
+                            data = [data]
+                    except:
+                        data = []
+                data.append[dump_dict]
                 with open(out, 'w') as f:
-                    json.dump(dump_dict, f)
+                    json.dump(data, f)
 
 
 
