@@ -29,9 +29,11 @@ def parse_args():
     parser.add_argument('config', help='train config file path')
     parser.add_argument('--work_dir', help='the dir to save logs and models')
     parser.add_argument(
-        '--resume-from', help='the checkpoint file to resume from')
+        '--resume-from', 
+        help='the checkpoint file to resume from')
     parser.add_argument(
-        '--load-from', help='the checkpoint file to load from')
+        '--load-from', 
+        help='the checkpoint file to load from')
     parser.add_argument(
         '--validate',
         type=bool,
@@ -177,17 +179,18 @@ def train_model(
     # fp16 setting
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
-        optimizer_config = Fp16OptimizerHook(
-            **cfg.optimizer_config, **fp16_cfg, distributed=distributed)
+        optimizer_config = Fp16OptimizerHook(**cfg.optimizer_config, **fp16_cfg, distributed=distributed)
     elif distributed and 'type' not in cfg.optimizer_config:
         optimizer_config = OptimizerHook(**cfg.optimizer_config)
     else:
         optimizer_config = cfg.optimizer_config
 
     # register hooks
-    runner.register_training_hooks(cfg.lr_config, optimizer_config,
-                                   cfg.checkpoint_config, cfg.log_config,
-                                   cfg.get('momentum_config', None))
+    runner.register_training_hooks(
+        cfg.lr_config, optimizer_config,
+        cfg.checkpoint_config, 
+        cfg.log_config,
+        cfg.get('momentum_config', None))
 
     if validate:
         eval_cfg = cfg.get('evaluation', {})

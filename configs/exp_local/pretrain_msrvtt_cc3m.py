@@ -14,7 +14,6 @@ multi_class = False
 aux_info = ['token_ids', 'segment_ids', 'input_mask', 'mlm_label', 'v_token_mask']
 save_root = '/data_sas/fhr/'
 load_pretrained_ckpts = save_root + 'Clover/pretrainedModel/swin-pretarined/swin_base_patch4_window7_224_22k.pth'
-# swin_pretrained/swin_base_patch244_window877_kinetics400_22k_nobackbone
 pretrained_textbackbone="/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
 resume_from = None
 SyncBN = True

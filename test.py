@@ -301,7 +301,8 @@ def main():
         videos_per_gpu=cfg.data.test.get('videos_per_gpu', 1),
         workers_per_gpu=cfg.data.test.get('workers_per_gpu', 1),
         dist=distributed,
-        shuffle=False)
+        shuffle=False
+    )
     dataloader_setting = dict(dataloader_setting, **cfg.data.get('test_dataloader', {}))
     data_loader = build_dataloader(dataset, **dataloader_setting)
 
@@ -347,6 +348,7 @@ def main():
                         dump_dict[int(epoch_num.split('_')[-1].split('.')[0])] = {name: val}
                     else:
                         print(f'{name}: {val:.04f}')
+                        dump_dict[f"{name}"] = val
                         
             print(dump_dict)
             if output_config.get('out', None):
@@ -358,7 +360,7 @@ def main():
                             data = [data]
                     except:
                         data = []
-                data.append[dump_dict]
+                data.append(dump_dict)
                 with open(out, 'w') as f:
                     json.dump(data, f)
 

@@ -15,7 +15,7 @@ multi_class = False
 aux_info = ['token_ids', 'segment_ids', 'input_mask']
 save_root = '/data_sas/fhr/'
 load_pretrained_ckpts = None
-pretrained_textbackbone="/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
+pretrained_textbackbone = "/data_sas/fhr/Clover/pretrainedModel/bert-base-uncased"
 resume_from = None
 SyncBN = False
 find_unused_parameters = True   
@@ -31,8 +31,9 @@ model = dict(
         type='SwinTransformer3D',
         stride=(2, 4, 4),
         pretrained2d=False,
-        pretrained=load_pretrained_ckpts),
-   freeze_text_backbone=None,
+        pretrained=load_pretrained_ckpts
+    ),
+    freeze_text_backbone=None,
     text_vocab_size=30522,
     mm_backbone=dict(
         type='CrossModalTransformerFromPretrained', # 后面那堆参数没用，fromPretrain表示用的现成的模型，模型大小是固定的
@@ -46,7 +47,7 @@ model = dict(
         token_types=2,
         layer_norm_eps=1e-12,
         word_pos_start=False,
-        ),
+    ),
     text_backbone=dict(
         type='BertFromPretrained',
         num_hidden_layers=12,
@@ -118,7 +119,7 @@ lr_config = dict(
     warmup_ratio=0.001, 
     warmup_by_epoch=True
 )
-total_epochs = 40
+total_epochs = 100
 checkpoint_config = dict(
     type='MYCheckpointHook', 
     interval=10, 
